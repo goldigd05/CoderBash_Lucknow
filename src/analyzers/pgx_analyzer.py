@@ -2,6 +2,7 @@
 PGx Analyzer
 Determines diplotype and phenotype from detected VCF variants.
 CPIC-aligned phenotype assignment logic.
+IMPORTANT: Only counts variants where patient actually carries the ALT allele (genotype != 0/0)
 """
 
 from typing import List, Tuple, Optional
@@ -38,16 +39,38 @@ def find_gene_for_drug(drug: str) -> Optional[str]:
     return DRUG_GENE_MAP.get(drug.upper())
 
 
+def is_variant_present(genotype: Optional[str]) -> bool:
+    """
+    Check if patient actually carries the ALT allele.
+    0/0 = homozygous reference = NO variant present
+    0/1 = heterozygous = variant present
+    1/1 = homozygous alt = variant present
+    1/0 = same as 0/1
+    """
+    if not genotype:
+        return True  # unknown, assume present
+    gt = genotype.replace("|", "/")  # handle phased genotypes
+    alleles = gt.split("/")
+    # If any allele is non-zero, variant is present
+    return any(a not in ("0", ".") for a in alleles)
+
+
 def detect_variants(vcf_variants: List[VCFVariant], gene: str) -> List[DetectedVariant]:
     """
     Cross-reference VCF variants against PGx knowledge base for a given gene.
+    Only includes variants where patient actually carries the ALT allele.
     """
     detected = []
     seen_rsids = set()
 
     for v in vcf_variants:
-        # Match by rsID in knowledge base
         rsid = v.rsid
+
+        # CRITICAL: Skip 0/0 genotypes — patient does not carry this variant
+        if not is_variant_present(v.genotype):
+            continue
+
+        # Match by rsID in knowledge base
         if rsid and rsid in PGX_VARIANTS:
             kb_entry = PGX_VARIANTS[rsid]
             if kb_entry["gene"] == gene and rsid not in seen_rsids:
@@ -81,12 +104,9 @@ def detect_variants(vcf_variants: List[VCFVariant], gene: str) -> List[DetectedV
     return detected
 
 
-def assign_phenotype(gene: str, detected: List[DetectedVariant]) -> Tuple[str, str, str, Optional[float]]:
+def assign_phenotype(gene: str, detected: List[DetectedVariant]) -> Tuple[str, str, str, str, Optional[float]]:
     """
     Assign phenotype and construct diplotype from detected variants.
-
-    Returns:
-        (allele1, allele2, diplotype, phenotype, activity_score)
     """
     lof = [d for d in detected if d.effect == "loss_of_function"]
     reduced = [d for d in detected if d.effect == "reduced_function"]
@@ -121,7 +141,7 @@ def assign_phenotype(gene: str, detected: List[DetectedVariant]) -> Tuple[str, s
 
     diplotype = f"{allele1}/{allele2}"
 
-    # Activity score (simplified)
+    # Activity score
     activity_map = {"loss_of_function": 0, "reduced_function": 0.5, "normal_function": 1, "increased_function": 2}
     if detected:
         scores = [activity_map.get(d.effect, 1) for d in detected]
