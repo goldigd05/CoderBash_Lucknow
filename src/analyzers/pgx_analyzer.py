@@ -1,9 +1,4 @@
-"""
-PGx Analyzer
-Determines diplotype and phenotype from detected VCF variants.
-CPIC-aligned phenotype assignment logic.
-IMPORTANT: Only counts variants where patient actually carries the ALT allele (genotype != 0/0)
-"""
+
 
 from typing import List, Tuple, Optional
 from dataclasses import dataclass
