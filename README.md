@@ -3,9 +3,8 @@
 > **RIFT 2026 Hackathon** | Pharmacogenomics / Explainable AI Track
 
 <h> Live Project demo</h>
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Deployed-00ff88?style=for-the-badge)]
-<h>Linkdin URLs </h>
-[![LinkedIn Video](https://img.shields.io/badge/Demo%20Video-LinkedIn-0077B5?style=for-the-badge)]
+https://coderbash-lucknow.onrender.com
+
 <h>CPIC Guidelines </h>
 [![CPIC Aligned](https://img.shields.io/badge/CPIC-Aligned-00b4ff?style=for-the-badge)](https://cpicpgx.org)
 
@@ -239,9 +238,8 @@ All risk assessments follow **CPIC (Clinical Pharmacogenomics Implementation Con
 
 | Name | Role |
 |---|---|
-| YOUR_NAME_HERE | Backend / PGx Logic / AI Integration |
-| TEAMMATE_NAME_HERE | Frontend / UI / UX |
-
+| Dilip jagriti goldi|
+| CoderBash tema name|
 
 
 ## 📁 Project Structure
